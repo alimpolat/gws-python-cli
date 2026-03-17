@@ -58,6 +58,21 @@ def print_auth_status(status: dict) -> None:
     console.print(table)
 
 
+def print_message(msg: dict) -> None:
+    """Print a full email message."""
+    console.print(f"[bold cyan]From:[/bold cyan] {msg['from']}")
+    console.print(f"[bold cyan]To:[/bold cyan] {msg['to']}")
+    if msg.get("cc"):
+        console.print(f"[bold cyan]CC:[/bold cyan] {msg['cc']}")
+    console.print(f"[bold cyan]Subject:[/bold cyan] {msg['subject']}")
+    console.print(f"[bold cyan]Date:[/bold cyan] {msg['date']}")
+    if msg.get("attachments"):
+        console.print(f"[bold cyan]Attachments:[/bold cyan] {', '.join(msg['attachments'])}")
+    console.print(f"[bold cyan]ID:[/bold cyan] [dim]{msg['id']}[/dim]")
+    console.print()
+    console.print(msg.get("body", "(no body)"))
+
+
 def print_inbox(messages: list[dict]) -> None:
     table = Table(title="Inbox")
     table.add_column("Date", style="dim", width=24)

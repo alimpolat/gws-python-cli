@@ -13,6 +13,7 @@ from gmsend.output import (
     print_inbox,
     print_info,
     print_json,
+    print_message,
     print_sent,
     print_success,
     print_warning,
@@ -161,6 +162,34 @@ def send(
         raise typer.Exit(1)
     except Exception as e:
         print_error(f"Failed to send: {e}")
+        raise typer.Exit(1)
+
+
+@app.command()
+def read(
+    message_id: str = typer.Argument(..., help="Gmail message ID (from inbox listing)."),
+    output_json: bool = typer.Option(False, "--json", help="Output as JSON."),
+):
+    """Read a full email message by ID.
+
+    Examples:
+        gmsend inbox                          # list messages, copy an ID
+        gmsend read 19abc123def456            # read that message
+        gmsend read 19abc123def456 --json     # raw JSON output
+    """
+    try:
+        from gmsend.client import GmailClient
+
+        client = GmailClient()
+        msg = client.read(message_id)
+
+        if output_json:
+            print_json(msg)
+        else:
+            print_message(msg)
+
+    except Exception as e:
+        print_error(f"Failed to read message: {e}")
         raise typer.Exit(1)
 
 
