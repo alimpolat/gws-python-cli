@@ -85,8 +85,16 @@ def auth(
 @app.command()
 def send(
     to: str = typer.Option(..., "--to", "-t", help="Recipient email(s), comma-separated."),
-    subject: str = typer.Option(..., "--subject", "-s", help="Email subject."),
+    subject: str = typer.Option("", "--subject", "-s", help="Email subject."),
     body: str = typer.Option("", "--body", "-b", help="Email body text."),
+    body_file: Optional[str] = typer.Option(
+        None, "--body-file", "-f",
+        help="Read body from a UTF-8 text file (overrides --body). Use for non-ASCII content."
+    ),
+    subject_file: Optional[str] = typer.Option(
+        None, "--subject-file",
+        help="Read subject from a UTF-8 text file (overrides --subject). Use for non-ASCII content."
+    ),
     attach: Optional[list[str]] = typer.Option(
         None, "--attach", "-a", help="File to attach (repeatable)."
     ),
@@ -102,7 +110,29 @@ def send(
         gmsend send --to alice@example.com --subject "Hello" --body "Hi!"
         gmsend send --to bob@co.com --subject "Report" --attach report.pdf
         gmsend send --to team@co.com --subject "Files" --attach a.pdf --attach b.xlsx
+        gmsend send --to court@dom.se --subject-file subj.txt --body-file body.txt
     """
+    # Validate that subject is provided via --subject or --subject-file
+    if not subject and not subject_file:
+        print_error("Provide --subject or --subject-file.")
+        raise typer.Exit(1)
+
+    # Read body from file if specified (preserves UTF-8)
+    if body_file:
+        body_path = Path(body_file)
+        if not body_path.exists():
+            print_error(f"Body file not found: {body_file}")
+            raise typer.Exit(1)
+        body = body_path.read_text(encoding="utf-8").strip()
+
+    # Read subject from file if specified (preserves UTF-8)
+    if subject_file:
+        subj_path = Path(subject_file)
+        if not subj_path.exists():
+            print_error(f"Subject file not found: {subject_file}")
+            raise typer.Exit(1)
+        subject = subj_path.read_text(encoding="utf-8").strip()
+
     # Validate attachments exist
     if attach:
         for filepath in attach:
