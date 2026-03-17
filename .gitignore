@@ -11,6 +11,7 @@ build/
 venv/
 *.json
 !pyproject.toml
+!.claude/settings.json
 .ruff_cache/
 .pytest_cache/
 .mypy_cache/
